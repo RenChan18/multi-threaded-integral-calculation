@@ -1,0 +1,29 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignOperands: true
+ColumnLimit: 80
+
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+
+BraceWrapping:
+  AfterClass: false
+  AfterControlStatement: false
+  AfterFunction: true
+  AfterStruct: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+  SplitEmptyFunction: true
+
+IncludeBlocks: Regroup
+SortIncludes: true
+IncludeCategories:
+  - Regex: '^<.*'
+    Priority: 1
+  - Regex: '^".*'
+    Priority: 2
+
+BreakBeforeBraces: Custom
+
