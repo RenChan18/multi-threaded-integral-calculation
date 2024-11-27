@@ -3,9 +3,55 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "consistent.h"
+#include "function.h"
+
+
+double (*select_function())(double) 
+{
+    double (*selected_function)(double) = NULL;
+
+    int choice;
+    printf("Choose a function to integrate:\n");
+    printf("1. x^2 + e^x\n   ----------\n   x^3 + 3e^x\n\n");
+    printf("2. x*arctg(4x)\n\n");
+    printf("3.      (x)        (x)\n   sin^2(-) * cos^2(-)\n        (4)        (4)\n\n");
+    printf("4.    1\n   ------ + 2 * x^(1/2)\n   x^(2/3)\n\n");
+    printf("5. x^3 + 2x^2 - 5x + 7\n   -------------------\n     x^3 - 2x^2 + x\n\n");
+    printf("Enter your choice (1-5): ");
+    scanf("%d", &choice);
+
+    switch (choice) {
+        case func_1:
+            selected_function = f1;
+            break;
+        case func_2:
+            selected_function = f2;
+            break;
+        case func_3:
+            selected_function = f3;
+            break;
+        case func_4:
+            selected_function = f4;
+            break;
+        case func_5:
+            selected_function = f5;
+            break;
+        default:
+            printf("Invalid choice.\n");
+            return NULL;
+    }
+
+    if (selected_function == NULL) {
+        printf("No function selected.\n");
+        return NULL;
+    }
+
+    return selected_function;
+}
 
 int main(int argc, char *argv[])
 {
+    
     int option;
     while (1) {
         int option_index = 0;
@@ -29,7 +75,8 @@ int main(int argc, char *argv[])
             } else {
                 printf("Option 'consistent' called with argument: %ld\n", value);
             }
-            perform_integration(value);
+            double (*func)(double) = select_function();
+            perform_integration(value, func);
             break;
         }
         case 's': {
