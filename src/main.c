@@ -2,8 +2,19 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "consistent.h"
 #include "function.h"
+#include "splitting.h"
+#include "parallel.h"
+
+double measure_time(void (*integration_func)(int, double (*)(double)), int intervals, double (*func)(double)) {
+    clock_t begin = clock(); 
+    integration_func(intervals, func);
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC; 
+    return time_spent;
+}
 
 
 double (*select_function())(double) 
@@ -51,17 +62,17 @@ double (*select_function())(double)
 
 int main(int argc, char *argv[])
 {
-    
+    double elapsed_time = 0.0; 
     int option;
     while (1) {
         int option_index = 0;
         static struct option long_options[] = {
             {"consistent", required_argument, 0, 'c'},
             {"splitting", required_argument, 0, 's'},
-            {"parallel", no_argument, 0, 'p'},
+            {"parallel", required_argument, 0, 'p'},
             {0, 0, 0, 0}};
 
-        option = getopt_long(argc, argv, "c:s:p", long_options, &option_index);
+        option = getopt_long(argc, argv, "c:s:p:", long_options, &option_index);
         if (option == -1)
             break;
 
@@ -76,7 +87,9 @@ int main(int argc, char *argv[])
                 printf("Option 'consistent' called with argument: %ld\n", value);
             }
             double (*func)(double) = select_function();
-            perform_integration(value, func);
+            elapsed_time = measure_time(perform_integration,value, func);
+            printf("Time taken: %.6f seconds\n", elapsed_time);
+    
             break;
         }
         case 's': {
@@ -88,11 +101,24 @@ int main(int argc, char *argv[])
             } else {
                 printf("Option 'splitting' called with argument: %ld\n", value);
             }
+            double (*func)(double) = select_function();
+            elapsed_time = measure_time(init_threads,value, func);
+            printf("Time taken: %.6f seconds\n", elapsed_time);
             break;
         }
-        case 'p':
-            printf("Option 'parallel' called\n");
-            break;
+        case 'p': {
+            errno = 0;
+            char *endptr;
+            long value = strtol(optarg, &endptr, 10);
+            if (errno != 0 || *endptr != '\0') {
+                printf("Invalid integer for 'parallel': %s\n", optarg);
+            } else {
+                printf("Option 'parallel' called with argument: %ld\n", value);
+            }
+            double (*func)(double) = select_function();
+            elapsed_time = measure_time(parallel,value, func);
+            printf("Time taken: %.6f seconds\n", elapsed_time);
+        }
         case '?':
             break;
         default:
